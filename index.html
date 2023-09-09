@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Gerenciamento de compras de ativos financeiros</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="FormatValues.js"></script>
+    <script src="app.js"></script>
+</head>
+<body>
+<div class="container" id="app">
+    <h1>Listagem de Ativos - {{ message }}</h1>
+    <br>
+    <div class="my-form">
+        <h3>Cadastrar nova operação</h3>
+        <form @submit.prevent="saveMyData" method="POST">
+            <label for="operation_type">Operação:</label>
+            <select v-model="myState.operation_type" name="operation_type">
+                <option value="Compra">Compra</option>
+                <option value="Venda">Venda</option>
+            </select>
+
+            <label for="code">Código:</label>
+            <input type="text" v-model="myState.code" name="code" required>
+
+            <label for="quantity">Quantidade:</label>
+            <input type="number" v-model="myState.quantity" name="quantity" required>
+
+            <label for="price">Cotação:</label>
+            <input type="number" v-model="myState.price" name="price" step="0.01" required>
+
+            <label for="operation_date">Data Operação:</label>
+            <input type="date" v-model="myState.operation_date" name="operation_date" required>
+
+            <input type="submit" value="Salvar">
+        </form>
+    </div>
+    <div>
+        <p>Listagem de ativos, filtre pelo código.</p>
+    </div>
+    <br>
+    <table v-if="message">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Operação</th>
+            <th>Código</th>
+            <th>Quantidade</th>
+            <th>Cotação</th>
+            <th>Data Operação</th>
+            <th>Valor Negociado</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="(operation, index)  in operations" :key="operation.id">
+            <td>{{ index + 1 }}</td>
+            <td>{{ operation.operation_type }}</td>
+            <td>{{ operation.code }}</td>
+            <td>{{ operation.quantity }}</td>
+            <td>{{ currencyFormat(operation.price) }}</td>
+            <td>{{ operation.operation_date }}</td>
+            <td>{{ currencyFormat(operation.operation_amount) }}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<script type="module">
+    const {createApp, ref, onMounted} = Vue
+
+    createApp({
+        setup() {
+            const message = ref('MVP - EngSoft')
+            const myState = ref({
+                operation_type: '',
+                quantity: '',
+                price: '',
+                operation_date: '',
+                code: ''
+            })
+
+            const operations = ref([{
+                operation_type: '',
+                quantity: '',
+                price: '',
+                operation_date: '',
+                operation_amount: ''
+            }])
+            const callRequest = () => {
+                myRequest().then(response => operations.value = response);
+            }
+            const saveMyData = () => {
+                postMyData(myState).then(() => callRequest());
+            }
+
+            onMounted(() => {
+                callRequest()
+            })
+            return {
+                message, operations, currencyFormat, myState, saveMyData
+            }
+        }
+    }).mount('#app')
+</script>
+</body>
+</html>
