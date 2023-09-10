@@ -36,6 +36,11 @@
             <input type="submit" value="Salvar">
         </form>
     </div>
+    <Transition name="fade">
+        <div id="loading_container" v-if="loadingData">
+            <div id="loading"></div>
+        </div>
+    </Transition>
     <div>
         <p>Listagem de ativos, filtre pelo código.</p>
     </div>
@@ -50,6 +55,7 @@
             <th>Cotação</th>
             <th>Data Operação</th>
             <th>Valor Negociado</th>
+            <th>Opções</th>
         </tr>
         </thead>
         <tbody>
@@ -61,6 +67,9 @@
             <td>{{ currencyFormat(operation.price) }}</td>
             <td>{{ operation.operation_date }}</td>
             <td>{{ currencyFormat(operation.operation_amount) }}</td>
+            <td>
+                <button type="button" @click="deleteMyData(operation.id)">Excluir</button>
+            </td>
         </tr>
         </tbody>
     </table>
@@ -72,6 +81,7 @@
     createApp({
         setup() {
             const message = ref('MVP - EngSoft')
+            const loadingData = ref(false)
             const myState = ref({
                 operation_type: '',
                 quantity: '',
@@ -80,25 +90,27 @@
                 code: ''
             })
 
-            const operations = ref([{
-                operation_type: '',
-                quantity: '',
-                price: '',
-                operation_date: '',
-                operation_amount: ''
-            }])
+            const operations = ref([])
             const callRequest = () => {
-                myRequest().then(response => operations.value = response);
+                loadingData.value = true
+                myRequest()
+                    .then(response => operations.value = response)
+                    .finally(() => loadingData.value = false);
             }
             const saveMyData = () => {
+                loadingData.value = true
                 postMyData(myState).then(() => callRequest());
+            }
+            const deleteMyData = (id) => {
+                loadingData.value = true
+                deleteRecord(id).then(() => callRequest());
             }
 
             onMounted(() => {
                 callRequest()
             })
             return {
-                message, operations, currencyFormat, myState, saveMyData
+                message, operations, currencyFormat, myState, saveMyData, deleteMyData, loadingData
             }
         }
     }).mount('#app')

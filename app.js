@@ -32,3 +32,17 @@ const postMyData = (myState) => {
             console.log(e);
         });
 }
+
+const deleteRecord = (id) => {
+    return fetch('http://localhost:5000/operation?operation_id=' + id, { method: 'DELETE' })
+        .then(data => {
+            return data.json();
+        })
+        .then(myData => {
+            console.log(myData)
+            return  myData;
+        })
+        .catch(function (error) {
+            console.log(error.message)
+        });
+}
