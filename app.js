@@ -11,14 +11,28 @@ const myRequest = () => {
         });
 }
 
+const myRequestOneRecord = (id) => {
+    return fetch('http://localhost:5000/operation?operation_id=' + id)
+        .then(data => {
+            return data.json();
+        })
+        .then(myData => {
+            console.log(myData)
+            return  myData;
+        })
+        .catch(function (error) {
+            console.log(error.message)
+        });
+}
+
 const postMyData = (myState) => {
     const form_data = new FormData();
-    for ( let key in myState.value ) {
-        form_data.append(key, myState.value[key]);
+    for ( let key in myState ) {
+        form_data.append(key, myState[key]);
     }
     const options = {
         method: 'POST',
-        body: form_data,
+        body: form_data
     };
     return fetch('http://localhost:5000/operation', options)
         .then(data => {
@@ -26,6 +40,26 @@ const postMyData = (myState) => {
         })
         .then(update => {
             console.log(update);
+            return true;
+        })
+        .catch(e => {
+            console.log(e);
+        });
+}
+
+const updateMyData = (myState) => {
+    const options = {
+        method: 'PUT',
+        body: JSON.stringify(myState),
+        headers: {
+            "Content-Type": "application/json"
+        }
+    };
+    return fetch('http://localhost:5000/operation/' + myState.id, options)
+        .then(data => {
+            return data.json();
+        })
+        .then(update => {
             return true;
         })
         .catch(e => {

@@ -16,26 +16,28 @@
         <h3>Cadastrar nova operação</h3>
         <form @submit.prevent="saveMyData" method="POST">
             <label for="operation_type">Operação:</label>
-            <select v-model="myState.operation_type" name="operation_type">
+            <select v-model="myState.operation_type" name="operation_type" id="operation_type">
                 <option value="Compra">Compra</option>
                 <option value="Venda">Venda</option>
+                <option value="Bonificação">Bonificação</option>
             </select>
 
             <label for="code">Código:</label>
-            <input type="text" v-model="myState.code" name="code" required>
+            <input type="text" v-model="myState.code" name="code" id="code" required>
 
             <label for="quantity">Quantidade:</label>
-            <input type="number" v-model="myState.quantity" name="quantity" required>
+            <input type="number" v-model="myState.quantity" name="quantity" id="quantity" required>
 
             <label for="price">Cotação:</label>
-            <input type="number" v-model="myState.price" name="price" step="0.01" required>
+            <input type="number" v-model="myState.price" name="price" step="0.01" id="price" required>
 
             <label for="operation_date">Data Operação:</label>
-            <input type="date" v-model="myState.operation_date" name="operation_date" required>
+            <input type="date" v-model="myState.operation_date" name="operation_date" id="operation_date" required>
 
             <input type="submit" value="Salvar">
         </form>
     </div>
+    <pre>{{myState}}</pre>
     <Transition name="fade">
         <div id="loading_container" v-if="loadingData">
             <div id="loading"></div>
@@ -55,7 +57,7 @@
             <th>Cotação</th>
             <th>Data Operação</th>
             <th>Valor Negociado</th>
-            <th>Opções</th>
+            <th>Ações</th>
         </tr>
         </thead>
         <tbody>
@@ -69,6 +71,7 @@
             <td>{{ currencyFormat(operation.operation_amount) }}</td>
             <td>
                 <button type="button" @click="deleteMyData(operation.id)">Excluir</button>
+                <button class="btn-edit" type="button" @click="getRecordForEdit(operation.id)">Editar</button>
             </td>
         </tr>
         </tbody>
@@ -76,41 +79,59 @@
 </div>
 
 <script type="module">
-    const {createApp, ref, onMounted} = Vue
+    const {createApp, ref, reactive, onMounted} = Vue
 
     createApp({
         setup() {
             const message = ref('MVP - EngSoft')
             const loadingData = ref(false)
-            const myState = ref({
+            const initialState = {
+                id: '',
                 operation_type: '',
                 quantity: '',
                 price: '',
                 operation_date: '',
                 code: ''
-            })
+            };
+            const myState = ref(initialState)
+            function resetForm() {
+                myState.value = initialState
+            }
 
             const operations = ref([])
             const callRequest = () => {
                 loadingData.value = true
+                resetForm()
                 myRequest()
                     .then(response => operations.value = response)
                     .finally(() => loadingData.value = false);
             }
             const saveMyData = () => {
                 loadingData.value = true
-                postMyData(myState).then(() => callRequest());
+                if (!myState.value.id) {
+                    postMyData(myState.value).then(() => callRequest());
+                }else {
+                    updateMyData(myState.value).then(() => callRequest());
+                }
             }
             const deleteMyData = (id) => {
                 loadingData.value = true
                 deleteRecord(id).then(() => callRequest());
+            }
+            const getRecordForEdit = (id) => {
+                loadingData.value = true
+                myRequestOneRecord(id)
+                    .then(response => {
+                        myState.value = response;
+                    })
+                    .finally(() => loadingData.value = false);
             }
 
             onMounted(() => {
                 callRequest()
             })
             return {
-                message, operations, currencyFormat, myState, saveMyData, deleteMyData, loadingData
+                message, operations, currencyFormat, myState, saveMyData, deleteMyData, loadingData, getRecordForEdit
             }
         }
     }).mount('#app')
