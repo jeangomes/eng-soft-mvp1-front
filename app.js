@@ -1,5 +1,9 @@
-const myRequest = () => {
-    return fetch('http://localhost:5000/operations')
+const myRequest = (codeFilter) => {
+    let url = 'http://localhost:5000/operations'
+    if (codeFilter !== '') {
+        url = 'http://localhost:5000/operations?code=' + codeFilter
+    }
+    return fetch(url)
         .then(data => {
             return data.json();
         })
@@ -17,7 +21,7 @@ const myRequestOneRecord = (id) => {
             return data.json();
         })
         .then(myData => {
-            console.log(myData)
+            // console.log(myData)
             return  myData;
         })
         .catch(function (error) {
@@ -39,7 +43,7 @@ const postMyData = (myState) => {
             return data.json();
         })
         .then(update => {
-            console.log(update);
+            // console.log(update);
             return true;
         })
         .catch(e => {
