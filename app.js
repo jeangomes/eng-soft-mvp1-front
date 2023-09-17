@@ -78,7 +78,6 @@ const deleteRecord = (id) => {
         })
         .then(myData => {
             console.log(myData)
-            return  myData;
         })
         .catch(function (error) {
             console.log(error.message)

@@ -10,7 +10,7 @@
 </head>
 <body>
 <div class="container" id="app">
-    <h1>Listagem de Ativos - {{ message }}</h1>
+    <h1>Gestão de compra de ativos financeiros</h1>
     <br>
     <div class="my-form">
         <h3>Cadastrar nova operação</h3>
@@ -46,12 +46,13 @@
         <label for="code_search">Filtrar por código</label>
         <input type="text" v-model="code_search" name="code" id="code_search" required>
         <button type="button" class="btn-search" @click="callRequest()">Pesquisar</button>
+
+        <p style="color: #453731; margin-top: 15px;">Registros encontrados: {{operations.length}}</p>
     </div>
     <br>
-    <table v-if="message">
+    <table>
         <thead>
         <tr>
-            <th>#</th>
             <th>Operação</th>
             <th>Código</th>
             <th>Quantidade</th>
@@ -63,7 +64,6 @@
         </thead>
         <tbody>
         <tr v-for="(operation, index)  in operations" :key="operation.id">
-            <td>{{ index + 1 }}</td>
             <td>{{ operation.operation_type }}</td>
             <td>{{ operation.code }}</td>
             <td>{{ operation.quantity }}</td>
@@ -84,7 +84,6 @@
 
     createApp({
         setup() {
-            const message = ref('MVP - EngSoft')
             const loadingData = ref(false)
             const initialState = {
                 id: '',
@@ -116,8 +115,10 @@
                 resetForm()
             }
             const deleteMyData = (id) => {
-                loadingData.value = true
-                deleteRecord(id).then(() => callRequest());
+                if (window.confirm("Você realmente deseja excluir esse registro?")) {
+                    loadingData.value = true
+                    deleteRecord(id).then(() => callRequest());
+                }
             }
             const getRecordForEdit = (id) => {
                 loadingData.value = true
@@ -132,7 +133,6 @@
                 callRequest()
             })
             return {
-                message,
                 operations,
                 currencyFormat,
                 myState,
